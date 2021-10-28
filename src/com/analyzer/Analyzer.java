@@ -1,89 +1,97 @@
 package com.analyzer;
 
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class Analyzer extends JFrame implements ActionListener {
+class BlockValue {
+    int lineSkip;
+    String tCalc;
 
-    JLabel fileLocationLabel;
-    JButton browseBtn;
-    JTextArea textarea;
+    public BlockValue(int lineSkip, String tCalc) {
+        this.lineSkip = lineSkip;
+        this.tCalc = tCalc;
+    }
+}
 
-    public static void main(String[] args) {
-	    new Analyzer();
+public abstract class Analyzer {
+
+    static final String START = "(INICIO)|(Inicio)|(inicio)";
+    static final String END = "(PARE)|(Pare)|(pare)";
+
+    static final String IF_BLOCK_START = "(SI)|(Si)|(si)";
+    static final String ELSE_BLOCK_START = "(SINO)|(Sino)|(sino)";
+    static final String IF_BLOCK_END = "(FSI)|(Fsi)|(fsi)";
+
+    static final String FOR_LOOP_START = "(PARA)|(Para)|(para)";
+    static final String FOR_LOOP_END = "(FPARA)|(Fpara)|(fpara)";
+
+    static final String READ = "(LEA)|(Lea)|(lea)";
+    static final String WRITE = "(ESC)|(Esc)|(esc)";
+
+
+    public static String solveFile(ArrayList<String> lines) throws Exception {
+        int firstLineIndex = searchFor(START, lines) + 1;
+
+        return solveBlock( lines.subList(firstLineIndex,lines.size()), END, firstLineIndex ).tCalc;
     }
 
-    public Analyzer() {
-        setSize(800, 600);
-        setLocationRelativeTo(null);
-        setResizable(false);
-        setLayout(null);
-        setTitle("Pseudocode Analyzer");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-        init();
-
-        setVisible(true);
-    }
-
-    private int getPadding(String side) {
-        switch(side){
-            case "top":
-            case "bottom":
-            case "left":
-            case "right":
-            default:
-                return 0;
+    private static int searchFor(String pattern, List<String> lines) {
+        int curLineIndex = 0;
+        while (!Pattern.matches(pattern, lines.get(curLineIndex)) && curLineIndex < lines.size()) {
+            curLineIndex ++;
         }
+        return curLineIndex;
     }
 
-    public int getWidth() {
-        int trueValue = super.getWidth();
-        return trueValue - getPadding("left") - getPadding("right");
-    }
+    private static BlockValue solveBlock(List<String> lines, String END_PATTERN, int startingLineIndex) throws Exception {
+        String tCalc = "";
+        for (int i = 0; i < lines.size(); i++) {
+            String curLine = lines.get(i);
+            String curLineFirstWord = curLine.split(" ")[0];
 
-    private void init() {
-        fileLocationLabel = new JLabel("");
-        fileLocationLabel.setSize(getWidth()-getPadding("left")-getPadding(""),50);
-        fileLocationLabel.setLocation(getPadding("left"), getPadding("top"));
-        add(fileLocationLabel);
+            if (Pattern.matches(FOR_LOOP_START, curLineFirstWord)) {
+                BlockValue vals = solveBlock(lines.subList(i+1, lines.size()), FOR_LOOP_END, startingLineIndex + i + 1 );
+                i = vals.lineSkip - startingLineIndex;
+                
+                tCalc += "1+sum(1+" + vals.tCalc + ")+";
+                continue;
+            }
 
-//        display = new Display();
-//        display.setSize(300,180);
-//        add(display);
+            if (Pattern.matches(IF_BLOCK_START, curLineFirstWord)) {
+                int nextElse = searchFor(ELSE_BLOCK_START, lines.subList(i+1, lines.size()))+i+2;
+                int nextEndIf = searchFor(IF_BLOCK_END, lines.subList(i+1, lines.size()))+i+2;
 
-//        nextStep = new JButton(">");
-//        nextStep.setFocusable(false);
-//        nextStep.setSize(50,50);
-//        nextStep.addActionListener(this);
-//        nextStep.setLocation(getWidth()-60, 220);
-//        add(nextStep);
+                if (nextElse < nextEndIf) {
+                    BlockValue vals = solveBlock(lines.subList(i+1, nextElse), ELSE_BLOCK_START, startingLineIndex + i + 1);
+                    i = vals.lineSkip - startingLineIndex;
+                    tCalc += "if(1+" + vals.tCalc + ")+";
 
-//        prevStep = new JButton("<");
-//        prevStep.setFocusable(false);
-//        prevStep.setSize(50,50);
-//        prevStep.addActionListener(this);
-//        prevStep.setLocation(5, 220);
-//        add(prevStep);
+                    vals = solveBlock(lines.subList(i+1, nextEndIf), IF_BLOCK_END, startingLineIndex + i + 1);
+                    i = vals.lineSkip - startingLineIndex;
+                    tCalc += "else(" + vals.tCalc + ")+";
+                } else {
+                    BlockValue vals = solveBlock(lines.subList(i+1, nextEndIf), IF_BLOCK_END, startingLineIndex + i + 1);
+                    i = vals.lineSkip - startingLineIndex;
+                    tCalc += "if(1+" + vals.tCalc + ")+";
+                }
 
-//        changeConfig = new JButton("Change Problem");
-//        changeConfig.setFocusable(false);
-//        changeConfig.setSize(150,50);
-//        changeConfig.addActionListener(this);
-//        changeConfig.setLocation((getWidth()-150)/2, 220);
-//        add(changeConfig);
+                continue;
+            }
+            if (Pattern.matches(END_PATTERN, curLineFirstWord)) {
+                if (tCalc.charAt(tCalc.length()-1) == '+') {
+                    tCalc = tCalc.substring(0, tCalc.length()-1);
+                }
+                return new BlockValue(i + startingLineIndex, tCalc);
+            }
 
-//        displayStep = new JLabel("");
-//        displayStep.setSize(20,50);
-//        displayStep.setLocation(getWidth()/2 - 20/2, 180);
-//        add(displayStep);
-
-//        refreshButtons();
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
+            tCalc += "1+";
+        }
+        throw new Exception(
+                "Code blocks are not correct:\n" +
+                "Searching for " + END_PATTERN + " turned no results." +
+                "Starting from line ["+(startingLineIndex)+"]"
+        );
     }
 }

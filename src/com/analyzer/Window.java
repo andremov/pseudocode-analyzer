@@ -3,13 +3,12 @@ package com.analyzer;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
 public class Window extends JFrame {
 
     JLabel fileLocationLabel;
+    JLabel tCostLabel;
     JButton browseBtn;
     JTextArea fileDisplayArea;
     JScrollPane scrollPane;
@@ -28,7 +27,7 @@ public class Window extends JFrame {
     }
 
     private int getPadding(String side) {
-        switch(side){
+        switch (side) {
             case "right":
                 return 15;
             case "top":
@@ -63,16 +62,15 @@ public class Window extends JFrame {
         int elemHeight = 40;
 
         browseBtn = new JButton("Browse");
-        browseBtn.setSize(200,elemHeight);
+        browseBtn.setSize(200, elemHeight);
         browseBtn.setLocation(getLocationFromRight(200), elemPosY);
         browseBtn.addActionListener(browseAction);
         add(browseBtn);
 
         fileLocationLabel = new JLabel("");
-        fileLocationLabel.setSize(getInnerWidth() - browseBtn.getWidth() - getElementMargin(),elemHeight);
+        fileLocationLabel.setSize(getInnerWidth() - browseBtn.getWidth() - getElementMargin(), elemHeight);
         fileLocationLabel.setLocation(getPadding("left"), elemPosY);
-        fileLocationLabel.setBackground(new Color(250,235,215));
-        fileLocationLabel.setBorder(new LineBorder(new Color(120,120,120)));
+        fileLocationLabel.setBorder(new LineBorder(new Color(120, 120, 120)));
         fileLocationLabel.setEnabled(false);
         add(fileLocationLabel);
 
@@ -81,19 +79,33 @@ public class Window extends JFrame {
 
         fileDisplayArea = new JTextArea("");
         fileDisplayArea.setEnabled(false);
-        fileDisplayArea.setForeground(new Color(0,0,0));
-        fileDisplayArea.setDisabledTextColor(new Color(0,0,0));
+        fileDisplayArea.setForeground(new Color(0, 0, 0));
+        fileDisplayArea.setDisabledTextColor(new Color(0, 0, 0));
         fileDisplayArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
         scrollPane = new JScrollPane(fileDisplayArea);
-        scrollPane.setBorder(new LineBorder(new Color(120,120,120)));
-        scrollPane.setSize(getInnerWidth(),elemHeight);
+        scrollPane.setBorder(new LineBorder(new Color(120, 120, 120)));
+        scrollPane.setSize(getInnerWidth(), elemHeight);
         scrollPane.setLocation(getPadding("left"), elemPosY);
         add(scrollPane);
+
+        elemPosY += elemHeight + getElementMargin();
+        elemHeight = 40;
+
+        tCostLabel = new JLabel("");
+        tCostLabel.setSize(getInnerWidth(), elemHeight);
+        tCostLabel.setLocation(getPadding("left"), elemPosY);
+        tCostLabel.setBorder(new LineBorder(new Color(120, 120, 120)));
+        tCostLabel.setEnabled(false);
+        add(tCostLabel);
     }
 
     public void updateUI(String fileLocation, String fileContents) {
         fileLocationLabel.setText(fileLocation);
         fileDisplayArea.setText(fileContents);
+    }
+
+    public void updateTValue(String tValue) {
+        tCostLabel.setText(tValue);
     }
 }

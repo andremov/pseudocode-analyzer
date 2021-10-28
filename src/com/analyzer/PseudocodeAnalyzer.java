@@ -33,7 +33,7 @@ public class PseudocodeAnalyzer {
         StringBuilder result = new StringBuilder();
         int numDigits = ("" + lines.size()).length();
         for (int i = 0; i < lines.size(); i++) {
-            result.append(" ").append("[").append(formatNumber(i+1, numDigits)).append("]");
+            result.append(" ").append("[").append(formatNumber(i + 1, numDigits)).append("]");
             result.append("  ").append(lines.get(i)).append("\n");
         }
         return String.valueOf(result);
@@ -41,7 +41,7 @@ public class PseudocodeAnalyzer {
 
     private String formatNumber(int inputNumber, int numDigits) {
         StringBuilder resultNumber = new StringBuilder("" + inputNumber);
-        while(resultNumber.length() < numDigits) {
+        while (resultNumber.length() < numDigits) {
             resultNumber.insert(0, " ");
         }
         return resultNumber.toString();
@@ -55,8 +55,8 @@ public class PseudocodeAnalyzer {
                 fileLines.add(reader.nextLine());
             }
             reader.close();
-            solveFile(fileLines);
             window.updateUI("  " + fileLocation, convertLines(fileLines));
+            window.updateTValue("  " + Analyzer.solveFile(fileLines));
         } catch (Exception e) {
             JOptionPane.showMessageDialog(window, "No se pudo leer el archivo.");
             e.printStackTrace();
@@ -70,18 +70,4 @@ public class PseudocodeAnalyzer {
         readFile(fileBrowsePopup.getSelectedFile());
     }
 
-    private void solveFile(ArrayList<String> lines) {
-        int curLine = 0;
-        while (!lines.get(curLine).equals("Inicio")) {
-            curLine ++;
-        }
-        curLine ++;
-
-//        System.out.println(curLine);
-
-    }
-
-    private void solveBlock(ArrayList<String> lines) {
-
-    }
 }
