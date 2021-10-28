@@ -2,7 +2,6 @@ package com.analyzer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 enum Block {
@@ -57,13 +56,25 @@ public abstract class Analyzer {
 
     }
 
-    public static String solveFile(ArrayList<String> lines) throws Exception {
+    public static String solveFile(ArrayList<String> lines) {
         int firstLineIndex = searchFor(START, lines) + 1;
         int lastLineIndex = searchFor(END, lines);
 
         CodeBlock mainCodeBlock = new CodeBlock(lines.subList(firstLineIndex,lastLineIndex));
         mainCodeBlock.crawl();
+
         Equation mainEquation = (Equation) mainCodeBlock.parseEquation();
+        System.out.println(mainEquation); // Original equation directly from code blocks.
+
+        mainEquation.minimize();
+        System.out.println(mainEquation); // Minimized equation as much as possible in the code block order.
+
+        mainEquation.sort();
+        System.out.println(mainEquation); // Sorted equation in polynomial order.
+
+        mainEquation.minimize();
+        System.out.println(mainEquation); // Minimized equation even more.
+        System.out.println(); // Empty line for better console reading.
 
         return mainEquation.toString();
     }

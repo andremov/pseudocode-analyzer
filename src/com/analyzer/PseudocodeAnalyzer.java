@@ -19,12 +19,7 @@ public class PseudocodeAnalyzer {
     }
 
     public PseudocodeAnalyzer() {
-        ActionListener browseAction = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleBrowseAction();
-            }
-        };
+        ActionListener browseAction = e -> handleBrowseAction();
         fileLines = new ArrayList<>();
         window = new Window(browseAction);
     }
