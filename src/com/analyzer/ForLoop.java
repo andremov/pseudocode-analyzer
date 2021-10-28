@@ -14,11 +14,16 @@ public class ForLoop extends CodeBlock {
 
     private Variable parseForLoop(String loopLine) {
         String[] vals_for = loopLine.split("=")[1].split(",");
-
-        if (vals_for[2].equals( "+1")) {
-            return new Variable(1, vals_for[1] + (vals_for[0].equals("1")? "":"-" + (Integer.parseInt(vals_for[0])-1)));
+        if (vals_for[2].charAt(0) == '+') {
+            String reduction = vals_for[0].equals("1")? "" : "-" + (Integer.parseInt(vals_for[0]) - 1);
+            String division = vals_for[2].charAt(1) == '1' ? "" : "/"+vals_for[2].charAt(1);
+            String base = "(" + vals_for[1] + reduction + ")" + division;
+            return new Variable(1, base);
         } else {
-            return new Variable(1, vals_for[0] + (vals_for[1].equals("1")? "":"-" + (Integer.parseInt(vals_for[1])-1)));
+            String reduction = vals_for[1].equals("1")? "" : "-" + (Integer.parseInt(vals_for[1]) - 1);
+            String division = vals_for[2].charAt(1) == '1' ? "" : "/"+vals_for[2].charAt(1);
+            String base = "(" + vals_for[0] + reduction + ")" + division;
+            return new Variable(1, base);
         }
     }
 
