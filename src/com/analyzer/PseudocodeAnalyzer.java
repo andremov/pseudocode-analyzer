@@ -51,6 +51,7 @@ public class PseudocodeAnalyzer {
         try {
             Scanner reader = new Scanner(inputFile);
             fileLocation = inputFile.getPath();
+            fileLines = new ArrayList<>();
             while (reader.hasNextLine()) {
                 fileLines.add(reader.nextLine());
             }
