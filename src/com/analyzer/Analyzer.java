@@ -11,70 +11,6 @@ enum Block {
     IF_BLOCK
 }
 
-//class BlockValue {
-//    List<String> lines;
-//    String tCalc;
-//
-//    public BlockValue(List<String> lines, String tCalc, MappedVariable[] mappedVariables) {
-//        this.lines = lines;
-//        this.tCalc = tCalc;
-//        this.mappedVariables = mappedVariables;
-//    }
-//
-//    public BlockValue(List<String> lines) {
-//        this.lines = lines;
-//        this.tCalc = "";
-//        this.mappedVariables = new MappedVariable[0];
-//    }
-//
-//    public BlockValue copy() {
-//        return new BlockValue(new ArrayList<>(this.lines), this.tCalc, this.mappedVariables);
-//    }
-//
-//    public void addCost(String extraCost) {
-//        this.tCalc += extraCost;
-//    }
-//
-//    public void deleteTrailingSign() {
-//        if (tCalc.charAt(tCalc.length()-1) == '+') {
-//            tCalc = tCalc.substring(0, tCalc.length()-1);
-//        }
-//    }
-//
-//    private void addMappedVariable(String newVariable) {
-//        MappedVariable[] newMappedVariables = new MappedVariable[this.mappedVariables.length+1];
-//        System.arraycopy(this.mappedVariables, 0, newMappedVariables, 0, this.mappedVariables.length);
-//        newMappedVariables[this.mappedVariables.length] = new MappedVariable(newVariable, ALPHABET[this.mappedVariables.length]);
-//        this.mappedVariables = newMappedVariables;
-//    }
-//
-//    public String findMappedVariable(String originalVariable) {
-//        for (MappedVariable mappedVariable : this.mappedVariables) {
-//            if (mappedVariable.originalValue.equals(originalVariable)) {
-//                return mappedVariable.newValue;
-//            }
-//        }
-//        this.addMappedVariable(originalVariable);
-//        return this.mappedVariables[this.mappedVariables.length-1].newValue;
-//    }
-//
-//    public String getLine() {
-//        String line = lines.get(0);
-//        lines.remove(0);
-//        return line;
-//    }
-//}
-
-//class MappedVariable {
-//    String originalValue;
-//    String newValue;
-//
-//    public MappedVariable(String originalValue, String newValue) {
-//        this.originalValue = originalValue;
-//        this.newValue = newValue;
-//    }
-//}
-
 public abstract class Analyzer {
 
     static final String START = "(INICIO)|(Inicio)|(inicio)";
@@ -86,14 +22,6 @@ public abstract class Analyzer {
 
     static final String FOR_LOOP_START = "(PARA)|(Para)|(para)";
     static final String FOR_LOOP_END = "(FPARA)|(Fpara)|(fpara)";
-
-//    static final String READ = "(LEA)|(Lea)|(lea)";
-//    static final String WRITE = "(ESC)|(Esc)|(esc)";
-//
-//    static final String ADDITION = "([0-9]+)([a-z_]+)\\+([0-9]+)([a-z_]+)";
-//    static final String MULTIPLICATION = "([0-9]+)([a-z_]+)\\*([0-9]+)([a-z_]+)";
-//    static final String IF_BLOCK = "\\[\\{([0-9\\+_]+)\\}\\{([0-9\\+_]+)\\}\\]";
-//    static final String EXTRA_PARENTHESES = "\\(([0-9a-z_]+)\\)";
 
     public static CodeBlock newBlockClass(Block block, List<String> fileLines) {
         switch(block) {
