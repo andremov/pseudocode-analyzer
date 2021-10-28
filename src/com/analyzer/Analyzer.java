@@ -30,11 +30,15 @@ public abstract class Analyzer {
     static final String READ = "(LEA)|(Lea)|(lea)";
     static final String WRITE = "(ESC)|(Esc)|(esc)";
 
+    static final String ADDITION = "([0-9]+)\\+([0-9]+)";
+    static final String MULTIPLICATION = "\\(([a-zA-Z]+[\\+\\-]?[0-9]*)\\)\\*\\(([0-9]+)\\)";
 
     public static String solveFile(ArrayList<String> lines) throws Exception {
         int firstLineIndex = searchFor(START, lines) + 1;
 
-        return solveBlock( lines.subList(firstLineIndex,lines.size()), END, firstLineIndex ).tCalc;
+        String basicCost = solveBlock( lines.subList(firstLineIndex,lines.size()), END, firstLineIndex ).tCalc;
+
+        return simplifyInstructionCount(basicCost);
     }
 
     private static int searchFor(String pattern, List<String> lines) {
@@ -54,8 +58,15 @@ public abstract class Analyzer {
             if (Pattern.matches(FOR_LOOP_START, curLineFirstWord)) {
                 BlockValue vals = solveBlock(lines.subList(i+1, lines.size()), FOR_LOOP_END, startingLineIndex + i + 1 );
                 i = vals.lineSkip - startingLineIndex;
-                
-                tCalc += "1+sum(1+" + vals.tCalc + ")+";
+                String[] vals_for = curLine.split("=")[1].split(",");
+                String it_for;
+
+                if (vals_for[2].equals( "+1")) {
+                    it_for = vals_for[1] + (vals_for[0].equals("1")? "":"-" + (Integer.parseInt(vals_for[0])-1));
+                } else {
+                    it_for = vals_for[0] + (vals_for[1].equals("1")? "":"-" + (Integer.parseInt(vals_for[1])-1));
+                }
+                tCalc += "1+("+it_for+")*(1+" + vals.tCalc + ")+";
                 continue;
             }
 
@@ -66,15 +77,18 @@ public abstract class Analyzer {
                 if (nextElse < nextEndIf) {
                     BlockValue vals = solveBlock(lines.subList(i+1, nextElse), ELSE_BLOCK_START, startingLineIndex + i + 1);
                     i = vals.lineSkip - startingLineIndex;
-                    tCalc += "if(1+" + vals.tCalc + ")+";
+                    int tcostIf = Integer.parseInt(simplifyInstructionCount(vals.tCalc));
 
                     vals = solveBlock(lines.subList(i+1, nextEndIf), IF_BLOCK_END, startingLineIndex + i + 1);
                     i = vals.lineSkip - startingLineIndex;
-                    tCalc += "else(" + vals.tCalc + ")+";
+                    int tcostElse = Integer.parseInt(simplifyInstructionCount(vals.tCalc));
+
+                    tCalc += ""+(Math.max(tcostElse,tcostIf)+1);
                 } else {
                     BlockValue vals = solveBlock(lines.subList(i+1, nextEndIf), IF_BLOCK_END, startingLineIndex + i + 1);
                     i = vals.lineSkip - startingLineIndex;
-                    tCalc += "if(1+" + vals.tCalc + ")+";
+                    int tcostIf = Integer.parseInt(simplifyInstructionCount(vals.tCalc));
+                    tCalc += "" + (tcostIf+1);
                 }
 
                 continue;
@@ -93,5 +107,26 @@ public abstract class Analyzer {
                 "Searching for " + END_PATTERN + " turned no results." +
                 "Starting from line ["+(startingLineIndex)+"]"
         );
+    }
+
+    private static String simplifyInstructionCount(String inputString) {
+        String resultString = inputString;
+        Pattern p = Pattern.compile(ADDITION);
+        Matcher m = p.matcher(resultString);
+
+        while (m.find()) {
+            resultString = m.replaceFirst("" + (Integer.parseInt(m.group(1)) + Integer.parseInt(m.group(2))));
+            m = p.matcher(resultString);
+        }
+
+        p = Pattern.compile(MULTIPLICATION);
+        m = p.matcher(resultString);
+
+        while (m.find()) {
+            resultString = m.replaceFirst((m.group(2) +"("+ m.group(1)+")"));
+            m = p.matcher(resultString);
+        }
+
+        return resultString;
     }
 }
